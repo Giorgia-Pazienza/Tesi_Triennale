@@ -1,0 +1,133 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{geometry}
+
+\usepackage{graphicx} 
+\usepackage{svg} % Aggiunto per poter leggere il file Foto.svg
+\usepackage{mathptmx} 
+\usepackage{tikz}
+
+% Margini
+\geometry{a4paper, top=3cm, bottom=3cm, left=2.5cm, right=2.5cm}
+
+\begin{document}
+
+\begin{titlepage}
+    % --- IMMAGINI SUI BORDI ---
+    \begin{tikzpicture}[remember picture,overlay]
+        % (L'immagine in ALTO è stata spostata sotto il testo dell'università)
+        
+        % Immagine in BASSO (rimane ancorata al fondo)
+        \node[anchor=south, yshift=0cm] at (current page.south) 
+        {\includesvg[width=\paperwidth]{FotoNera}}; 
+\end{tikzpicture}
+    \begin{center}
+        % Spazio iniziale rimosso perché il logo non è più in alto a coprire il bordo
+        
+        {\large UNIVERSITÀ DEGLI STUDI DI ROMA TOR VERGATA} \\[0.3cm]
+        {\normalsize MACROAREA DI SCIENZE MATEMATICHE, FISICHE E NATURALI} \\[0.8cm] % Spazio prima del logo
+        
+        % --- LOGO SPOSTATO QUI ---
+        % Ho lasciato larghezza 10cm, ho tolto l'altezza fissa per non deformare l'immagine, 
+        % ma se vuoi puoi rimettere height=2cm
+        \includegraphics[width=8cm]{Logo2.png}
+        
+        \vspace{1.5cm} 
+        
+        {\normalsize FACOLTÀ DI SCIENZE MM.FF.NN} \\[0.2cm]
+        {\normalsize \textit{Corso di Laurea in Informatica}
+        
+        \vspace{1.5cm}
+        
+        {\normalsize \textbf{\textit{SVILUPPO DI UN'APPLICAZIONE BASATA SUL PARADIGMA MAAS} \\[0.2cm]
+        {\normalsize \textbf{CON APPLICAZIONE ALLA CITT\`A DI SCICLI}}}
+        
+        \vspace{2.0 cm}
+\end{center}
+
+% Aggiungi questo comando per "tirare su" il testo. 
+% Puoi modificare il valore (es. -3cm, -4cm) finché non trovi la posizione perfetta.
+\vspace*{-0.5cm} 
+
+% Relatore e Laureanda
+\noindent
+\begin{minipage}[t]{0.5\textwidth}
+    {\normalsize
+    \textbf{Relatore:} \\
+        Prof. \textit{Andrea D'Ambrogio}
+    \end{minipage}%
+    \hfill
+        \begin{minipage}[t]{0.45\textwidth}\raggedleft
+        {\normalsize 
+        \textbf{ Laureanda:} \\
+        matricola: 0327369 \\
+        \textit{Giorgia Pazienza}
+        }
+    \end{minipage}
+
+    \vspace{0.7cm} % Spazio fisso per scendere prima dell'anno accademico
+
+    % Anno Accademico
+    \begin{center}
+        {\normalsize Anno Accademico 2025/2026}
+    \end{center}
+    
+    \vspace*{2cm} % Spazio per non finire sotto l'immagine in basso
+\end{titlepage}
+
+\newpage
+
+    \begin{center}
+        % Spazio iniziale rimosso perché il logo non è più in alto a coprire il bordo
+        
+        {\large UNIVERSITÀ DEGLI STUDI DI ROMA TOR VERGATA} \\[0.3cm]
+        {\normalsize MACROAREA DI SCIENZE MATEMATICHE, FISICHE E NATURALI} \\[0.8cm] % Spazio prima del logo
+        
+        % --- LOGO SPOSTATO QUI ---
+        % Ho lasciato larghezza 10cm, ho tolto l'altezza fissa per non deformare l'immagine, 
+        % ma se vuoi puoi rimettere height=2cm
+        \includegraphics[width=8cm]{Logo2.png}
+        
+        \vspace{1.5 cm} 
+        
+        {\normalsize CORSO DI STUDIO IN INFORMATICA} \\ [0.2cm]
+        {\normalsize \textit{Tesi di Laurea in Ingegneria del Software}}
+        
+        \vspace{1.0cm}
+        
+        {\normalsize \textbf{\textit{SVILUPPO DI UN'APPLICAZIONE BASATA SUL PARADIGMA MaaS:} \\[0.2cm]
+        {\normalsize \textbf{con applicazione alla città di Scicli}}}
+        
+        \vspace{1.3 cm}
+\end{center}
+
+% Aggiungi questo comando per "tirare su" il testo. 
+% Puoi modificare il valore (es. -3cm, -4cm) finché non trovi la posizione perfetta.
+\vspace*{-0.5cm} 
+
+% Relatore e Laureanda
+\noindent
+\begin{minipage}[t]{0.5\textwidth}
+    {\normalsize
+    \textbf{Relatore:} \\
+        Prof. \textit{Andrea D'Ambrogio}
+    \end{minipage}%
+    \hfill
+        \begin{minipage}[t]{0.45\textwidth}\raggedleft
+        {\normalsize 
+        \textbf{ Laureanda:} \\
+        matricola: 0327369 \\
+        \textit{Giorgia Pazienza}
+        }
+    \end{minipage}
+
+    \vspace{0.7cm} % Spazio fisso per scendere prima dell'anno accademico
+
+    % Anno Accademico
+    \begin{center}
+        {\normalsize Anno Accademico 2025/2026}
+    \end{center}
+    
+  
+\end{document}
