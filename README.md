@@ -35,7 +35,7 @@ Il sistema sviluppato e testato con successo implementa:
 Tutta la documentazione ufficiale prodotta per la tesi è disponibile pubblicamente in questa repository. 
 
 * 📄 [**Leggi l'Elaborato Completo (Tesi.pdf)**](/Tesi.pdf)
-* 📊 [**Guarda le Slide della Discussione (PDF)**](presentazione/Presentazione20minuti.html)
+* 📊 [**Guarda le Slide della Discussione (PDF)**](Presentazione/Presentazione20minuti.html)
 
 ## 🔒 Nota sul Codice Sorgente
 
