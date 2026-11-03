@@ -1,0 +1,151 @@
+\documentclass[12pt, a4paper, oneside]{report}
+
+% --- Codifica e Lingua ---
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+
+% --- Font e Tipografia ---
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Geometria della pagina ---
+\usepackage{geometry}
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=3cm, right=3cm}
+
+% --- Matematica ---
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+% --- Grafica, Colori e Disegni ---
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Tabelle ---
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{ragged2e}
+
+% --- Didascalie e Liste ---
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf}
+\usepackage{enumitem}
+\setlist[itemize]{topsep=4pt, itemsep=3pt}
+\setlist[enumerate]{topsep=4pt, itemsep=3pt}
+
+% --- Titoli e Indici ---
+\usepackage{titlesec}
+\usepackage{titletoc}
+
+% --- Codice (Listings) ---
+\usepackage{listings}
+\definecolor{codetext}{RGB}{36,53,68}
+\definecolor{codekey}{RGB}{26,72,130}
+\definecolor{codegray}{RGB}{95,106,117}
+\lstdefinestyle{tesi}{
+  basicstyle=\ttfamily\footnotesize\color{codetext},
+  keywordstyle=\bfseries\color{codekey},
+  commentstyle=\itshape\color{codegray},
+  stringstyle=\color{codetext},
+  numbers=left, numberstyle=\tiny\color{codegray}, numbersep=7pt,
+  frame=single, framerule=0.3pt, rulecolor=\color{codegray!35},
+  backgroundcolor=\color{gray!4}, breaklines=true, breakatwhitespace=true,
+  columns=fullflexible, keepspaces=true, showstringspaces=false,
+  aboveskip=10pt, belowskip=10pt, captionpos=b
+}
+\lstset{style=tesi}
+
+% --- Comandi e Stili Personalizzati ---
+% Custom column per tabelle
+\newcolumntype{P}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\setlength{\tabcolsep}{4pt}
+\emergencystretch=2em
+
+% Modifica stile capitoli
+\makeatletter
+\def\@makechapterhead#1{%
+  \vspace*{20\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \interlinepenalty\@M
+    \huge \bfseries Capitolo \thechapter : #1 \par\nobreak
+    \vskip 40\p@
+  }}
+\makeatother
+
+% Modifica stile sezioni
+\titleformat{\section}
+  {\normalfont\large\bfseries} 
+  {\thesection}                
+  {1em}                      
+  {}                          
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+
+% Comando personalizzato per le tabelle Use Case
+\newcommand{\usecasetable}[7]{
+    \noindent
+    \begin{tabularx}{\textwidth}{p{3.5cm} X}
+        \toprule
+        \textbf{Proprietà} & \textbf{Descrizione} \\ \midrule
+        \textbf{Nome Use Case} & #1 \\
+        \textbf{Descrizione} & #2 \\
+        \textbf{Attori Coinvolti} & #3 \\
+        \textbf{Precondizioni} & #4 \\
+        \textbf{Scenario Principale} & #5 \\
+        \textbf{Scenari Alternativi} & #6 \\
+        \textbf{Post-condizioni} & #7 \\
+        \bottomrule
+    \end{tabularx}
+    \vspace{1.5em}
+}
+
+% --- Hyperref (DEVE essere caricato sempre per ultimo) ---
+\usepackage{xurl}
+\usepackage[colorlinks=true, urlcolor=blue, linkcolor=black]{hyperref}
+\urlstyle{same}
+
+% --- Inizio Documento ---
+\title{Progetto Tesi: parte 1 - Mobilità Urbana Scicli}
+\author{}
+\date{}
+
+\begin{document}
+\tableofcontents
+
+\input{Dedica}
+\newpage
+
+\input{Capitolo_0.tex}
+\newpage
+
+\input{Capitolo_1.tex}
+\newpage
+
+\input{Capitolo_2.tex}
+\newpage
+
+\input{Capitolo_3.tex}
+\newpage
+
+\input{Capitolo_4.tex}
+\newpage
+
+\input{Capitolo_5.tex}
+\newpage
+
+\input{Ringraziamenti.tex}
+\newpage
+
+\input{bibliografia.tex}
+
+\end{document}

@@ -1,0 +1,355 @@
+\chapter{Implementazione}
+Sulla base dell'analisi dei requisiti e delle scelte progettuali illustrate nei capitoli precedenti, il presente capitolo approfondisce la realizzazione tecnica della piattaforma \emph{Mobility as a Service} (MaaS) sviluppata per il contesto territoriale di Scicli. L'obiettivo è descrivere in maniera sistematica l'architettura software, l'implementazione tecnica del sistema, descrivendo l'architettura generale, le tecnologie impiegate e le logiche di sviluppo adottate per la sua costruzione.
+\\
+L'implementazione è stata orientata alla costruzione di un prototipo integrato, in grado di offrire un'interfaccia di accesso differenziata in base alla tipologia di utente. 
+\\
+Per ridurre i tempi di sviluppo e la complessità delle attività infrastrutturali, il progetto adotta un approccio basato su servizi \emph{Backend-as-a-Service} (BaaS), integrato con un backend applicativo dedicato. 
+\\
+È opportuno precisare fin da subito che non tutte le richieste del frontend transitano attraverso il backend Java. L'esame del codice mostra un'integrazione \emph{ibrida}: alcune operazioni utilizzano le API REST del server, mentre altre interrogano direttamente Cloud Firestore.
+
+\section{Architettura generale della piattaforma: approccio BaaS e separazione delle responsabilità}
+
+Con l'espressione \emph{Backend-as-a-Service} si indica un modello di sviluppo nel quale alcune capacità tipiche del livello server sono offerte come servizi gestiti da un fornitore esterno. In questo modello l'applicazione non deve necessariamente predisporre e amministrare autonomamente ogni componente relativo all'autenticazione, alla memorizzazione dei dati, alla disponibilità dei servizi o alle operazioni di manutenzione infrastrutturale. Lo sviluppatore può quindi concentrare una parte maggiore dell'attività sulle funzionalità specifiche del dominio applicativo. L'adozione di un BaaS non elimina, tuttavia, la necessità di progettare con attenzione il modello dei dati, la sicurezza degli accessi e le regole applicative; tali responsabilità rimangono in capo a chi sviluppa il sistema.
+\\
+Nel caso di MaaS Scicli, la soluzione individuata combina due approcci complementari. 
+\begin{itemize}
+    \item Firebase costituisce l'infrastruttura gestita per l'identità
+    \item mentre Spring Boot svolge il ruolo di backend personalizzato per quelle operazioni che richiedono una mediazione applicativa.
+\end{itemize}
+La Figura~\ref{fig:architettura} rappresenta l'articolazione dei principali componenti. Le interazioni tra frontend e backend avvengono mediante chiamate HTTP che utilizzano risorse identificate da URI e, prevalentemente, messaggi in formato JSON. 
+Il backend, attraverso Firebase Admin SDK, accede ai dati e verifica i token di autenticazione. Parallelamente, il frontend utilizza il Firebase JavaScript SDK per avviare sessioni di autenticazione, eseguire alcune letture dirette e ricevere notifiche di aggiornamento sui documenti Firestore.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={
+    draw=black!65,
+    rounded corners=3pt,
+    align=center,
+    minimum height=1.15cm,
+    text width=4.5cm,
+    fill=gray!6
+  },
+  smallbox/.style={
+    draw=black!65,
+    rounded corners=3pt,
+    align=center,
+    minimum height=1.15cm,
+    text width=3.5cm,
+    fill=gray!3
+  },
+  arrow/.style={-{Latex[length=2mm]}, line width=.75pt},
+  both/.style={{Latex[length=2mm]}-{Latex[length=2mm]}, line width=.75pt}
+]
+
+% Nodi principali
+\node[box] (client) at (0,3.5)
+{\textbf{Browser / PWA}\\ React Native Web\\ Vite e React Router};
+
+\node[box] (server) at (8,3.5)
+{\textbf{Spring Boot}\\ Interfaccia compilata\\ API e controlli applicativi};
+
+% Nodi secondari
+\node[smallbox] (auth) at (0,0)
+{\textbf{Firebase Authentication}\\ Identità e token};
+
+\node[smallbox] (firestore) at (5,0)
+{\textbf{Cloud Firestore}\\ Dati applicativi};
+
+\node[smallbox] (h2) at (10,0)
+{\textbf{H2 in memoria}\\ Modulo GTFS};
+
+% Collegamenti
+\draw[both] (client.east) -- node[above, align=center, font=\scriptsize]
+{HTTP/JSON\\token ove richiesto} (server.west);
+
+\draw[both] (client.south) -- node[left, align=center, font=\scriptsize]
+{SDK client\\autenticazione} (auth.north);
+
+% Spring Boot -> Cloud Firestore
+\draw[arrow]
+    ([xshift=-1.1cm]server.south)
+    -- node[left, font=\scriptsize, xshift=-2pt]
+       {Admin SDK}
+       ++(0,-1.1cm)
+    -| (firestore.north);
+
+% Spring Boot -> H2
+\draw[arrow]
+    ([xshift=1.1cm]server.south)
+    -- node[right, font=\scriptsize, xshift=2pt]
+       {JPA / repository}
+       ++(0,-1.4cm)
+    -| (h2.north);
+    
+\end{tikzpicture}
+\caption{Architettura generale del sistema.}
+\label{fig:architettura}
+\end{figure}
+\section{React Native per lo sviluppo Front-end}
+
+Per il frontend è stato adottato \emph{React Native}, framework che consente di realizzare interfacce applicative utilizzando il modello a componenti di React. L'impiego di componenti riutilizzabili permette di separare le parti visive dalle procedure di caricamento e trattamento dei dati, favorendo un'organizzazione modulare dell'applicazione. 
+\\ 
+In questa fase prototipale, l'applicazione non prevede la distribuzione tramite gli store digitali (come Google Play Store o Apple App Store), né la generazione di pacchetti nativi dedicati (APK o IPA). Il sistema è invece fruibile come Progressive Web App (PWA) integrata direttamente nel server backend Spring Boot, il quale si occupa di distribuire contestualmente sia l'interfaccia frontend compilata sia le API REST sullo stesso indirizzo di rete. Di conseguenza, il dispositivo mobile dell'utente non esegue il codice di backend, ma vi accede semplicemente tramite browser. L'installazione dell'applicativo sul telefono è gestita direttamente dal browser web (ad esempio, mediante l'opzione \textit{"Aggiungi a schermata Home"}), garantendo un'esperienza d'uso a schermo intero affine a quella di un'applicazione nativa. È opportuno precisare che, affinché le funzionalità PWA e i servizi hardware del dispositivo (come la geolocalizzazione) operino correttamente su un telefono fisico, la distribuzione del sistema richiede un contesto di rete sicuro, tipicamente implementato tramite protocollo HTTPS.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\linewidth]{Foto/IMG_5841-removebg-preview.png}
+    \caption{}
+    \label{fig:placeholder}
+\end{figure}
+\noindent
+L'uso di React Native si presta inoltre alla realizzazione di un'interfaccia multipiattaforma, mantenendo una base di codice largamente condivisa.
+\\
+Al termine della fase di collaudo, si procederà al rilascio finale compilando il codice sorgente nei pacchetti nativi dell'applicazione. In questo modo, l'utente finale non dovrà avviare alcun server locale da terminale o interagire con strumenti di sviluppo, ma potrà scaricare e installare l'applicazione in modo semplice, trasparente e sicuro direttamente dagli store digitali ufficiali, come Google Play Store e Apple App Store.
+\\
+La \texttt{HomeScreen.js} rappresenta l'hub centrale per l'utente. Da questa interfaccia, dotata di una barra di navigazione personalizzata e di un layout scorrevole, l'utente può cercare rapidamente un luogo o un servizio. Questa schermata integra collegamenti rapidi per l'acquisto di biglietti per la sosta e fornisce una serie di pulsanti per instradare le diverse tipologie di utenti (Cittadino, Turista, Admin Ente, Operatore, Funzionario) verso le rispettive dashboard dedicate.
+\\
+L'applicazione prevede una vista iniziale comune, seguita da percorsi differenziati in funzione del profilo restituito dopo l'accesso. Il frontend riconosce i ruoli \texttt{CITTADINO}, \texttt{TURISTA}, \texttt{OPERATORE}, \texttt{FUNZIONARIO}, \texttt{ADMIN} e \texttt{ADMIN\_ENTE}.
+\\
+Sono presenti, tra le altre, le schermate \texttt{ConsultazioneMobilita}, \texttt{PrenotazioneDRT}, \texttt{PaymentSosta}, \texttt{PaymentBiglietti}, \texttt{AcquistoSpeciali}, \texttt{GestioneFlotta}, 
+\\\texttt{GestioneStaff}, \texttt{GestioneCorse} e \texttt{GestioneOrdinanze} e le altre operazioni che i vari utenti effettuano, elencate nei vari activity diagram. 
+\\
+Per gli utenti non istituzionali, il codice di login opera inoltre una distinzione tra cittadino e turista sulla base del comune di residenza presente nel profilo, attribuendo la categoria \texttt{CITTADINO} al valore ``Scicli'' e \texttt{TURISTA} negli altri casi. Si tratta di una regola di navigazione implementata nel client, distinta dall'attribuzione formale dei permessi lato server.
+\\
+Di seguito, è descritta una tabella contenente i profili, i rispettivi nomi dove sono implementati quest'ultimi.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{P{3.0cm}P{5.0cm}P{6cm}}
+\toprule
+\textbf{Profilo} & \textbf{Vista di riferimento} & \textbf{Funzioni presentate nel prototipo}\\
+\midrule
+Cittadino & \texttt{CittadinoDashboard} & Consultazione della mobilità, sosta, richieste DRT e accesso a pagine informative.\\
+Turista & \texttt{TuristaDashboard} & Accesso a servizi di mobilità e soluzioni rivolte ai visitatori, inclusi pacchetti dimostrativi.\\
+Operatore & \texttt{OperatoreDashboard} & Gestione delle richieste di corsa e visualizzazione delle comunicazioni.\\
+Funzionario & \texttt{FunzionarioDashboard} & Consultazione e gestione di informazioni amministrative; alcune operazioni sono ancora locali alla schermata.\\
+Amministratore dell'ente & \texttt{AdminEnteDashboard} & Gestione della flotta, del personale, delle corse e delle tariffe.\\
+\bottomrule
+\end{tabular}
+\caption{}
+\label{tab:ruoli}
+\end{table}
+
+\noindent
+Nel frontend sono presenti due modalità di recupero delle informazioni. 
+\begin{itemize}
+    \item La prima utilizza \texttt{fetch}, funzione per l'invio di richieste HTTP agli endpoint Spring Boot.
+    \item La seconda utilizza funzioni dello SDK Firestore.
+\end{itemize}
+\vspace{0.5em}
+Questa combinazione di chiamate REST e comunicazioni dirette con il database rende il prototipo flessibile, ma introduce due modelli di accesso ai dati che devono rimanere coerenti. In prospettiva è opportuno stabilire criteri architetturali espliciti: riservare al backend le operazioni che contengono regole di business, vincoli economici o autorizzazioni complesse e consentire accessi diretti solo quando siano necessari e adeguatamente controllati dalle regole di sicurezza Firestore.
+
+\section{Implementazione del backend e delle API REST}
+Il backend è implementato in Java e utilizza Spring Boot, framework che semplifica la configurazione e l'organizzazione di applicazioni server. 
+\\
+In particolare, la classe \texttt{FirebaseService} centralizza numerose operazioni verso Firestore: lettura delle informazioni sul trasporto, gestione dei profili, registrazione di prenotazioni e transazioni, trattamento delle ordinanze e funzioni di amministrazione. Sebbene tale concentrazione sia pratica nelle prime fasi prototipali, in un'evoluzione del sistema sarebbe preferibile separare il servizio in componenti specializzati per dominio funzionale, allo scopo di migliorare coesione, manutenibilità e testabilità.
+\\
+Il backend è organizzato intorno a controller contrassegnati dall'annotazione: 
+\\
+\texttt{@RestController}, che rendono accessibili le funzionalità applicative tramite endpoint. L'annotazione \texttt{@RequestMapping} individua il percorso comune della risorsa, mentre annotazioni quali \texttt{@GetMapping}, \texttt{@PostMapping}, \texttt{@PutMapping} e \texttt{@DeleteMapping} specificano le operazioni consentite. 
+\\
+I controller restituiscono frequentemente oggetti \texttt{ResponseEntity}, mediante i quali è possibile associare alla risposta un codice HTTP e un contenuto JSON.
+
+\begin{longtable}{P{4.0cm}P{5.3cm}P{5.0cm}}
+\label{tab:api}\\
+\toprule
+\textbf{Controller} & \textbf{Percorso principale} & \textbf{Responsabilità}\\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Controller} & \textbf{Percorso principale} & \textbf{Responsabilità}\\
+\midrule
+\endhead
+
+\texttt{Autenticazione} &
+\texttt{/api/auth/login} e \texttt{/api/auth/register} &
+Validazione del token e lettura o registrazione del profilo.\\
+
+\texttt{Consultazione}\newline\texttt{Controller} &
+\texttt{/api/linee/cerca} e \texttt{/api/linee/}\newline\texttt{cercaVia} &
+Ricerca di linee e fermate.\\
+
+\texttt{PannelloDRT} &
+\texttt{/api/drt/prenota} &
+Inserimento delle richieste di trasporto a chiamata.\\
+
+\texttt{OrdinanzeController} &
+\texttt{/api/ordinanze} &
+Lettura e pubblicazione delle ordinanze.\\
+
+\texttt{PannelloGestione}\newline\texttt{Admin} &
+\texttt{/api/admin/bus} e \texttt{/api/admin/staff} &
+Gestione di flotta e personale.\\
+
+\texttt{DemoWallet}\newline\texttt{Controller} &
+\texttt{/api/demo-wallet/}\newline\texttt{payments} &
+Creazione, consultazione e variazione dello stato delle operazioni simulate.\\
+
+\texttt{PercorsoGtfs}\newline\texttt{Controller} &
+\texttt{/api/cerca-}\newline\texttt{percorso} &
+Interrogazione di percorsi diretti secondo il modello GTFS.\\
+
+\bottomrule
+\caption{}
+\end{longtable}
+\noindent
+Il componente \texttt{FirebaseService} svolge il ruolo di intermediario verso Firebase. Attraverso il suo impiego, i controller possono delegare la lettura e la modifica dei documenti senza duplicare in ogni metodo la configurazione dei client o le istruzioni di accesso a Firestore. Il modulo GTFS segue una separazione più articolata, composta da \texttt{PercorsoGtfsController}, \texttt{PercorsoGtfsService} e \texttt{PercorsoGtfsRepository}: il controller riceve i parametri, il servizio coordina la ricerca e il repository esegue le query sul database relazionale.
+\\
+Una parte significativa della robustezza del sistema dipende dalla validazione dei valori forniti dall'utente. Nel controller di autenticazione la registrazione richiede campi testuali non vuoti e ne controlla la lunghezza; il controller delle ordinanze applica vincoli al titolo, al testo e alla data; il modulo dei pagamenti verifica il tipo di operazione, la struttura dei parametri e gli intervalli ammessi. In caso di richiesta non valida, i metodi possono restituire \texttt{400 Bad Request}; nel caso di credenziali mancanti o non valide, il modulo di login restituisce \texttt{401 Unauthorized}. Sono inoltre presenti casi di \texttt{403 Forbidden}, \texttt{404 Not Found}, \texttt{409 Conflict} e \texttt{500 Internal Server Error}.
+
+\section{Modello dei dati e integrazione con Cloud Firestore}
+
+Cloud Firestore adotta un modello NoSQL basato su collezioni e documenti. Ciascun documento è identificato da una chiave e contiene un insieme di campi, che possono rappresentare valori testuali, numerici, temporali, booleani o strutture composite, come array e mappe. A differenza di un database relazionale tradizionale, la struttura dei documenti non impone uno schema tabellare rigido; tale flessibilità è utile nella fase di evoluzione di un prototipo, ma richiede una disciplina esplicita nella scelta dei nomi dei campi e nella coerenza dei tipi utilizzati.
+\\
+La console Firebase è strutturata come illustrato nella Tabella~\ref{tab:collezioni}.
+\begingroup
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{longtable}{P{3cm}P{6.1cm}P{5.5cm}}
+\label{tab:collezioni}\\
+\toprule
+\textbf{Collezione} &
+\textbf{Campi rappresentativi} &
+\textbf{Funzione applicativa}\\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Collezione} &
+\textbf{Campi rappresentativi} &
+\textbf{Funzione applicativa}\\
+\midrule
+\endhead
+\endfoot
+\texttt{FermateBus} &
+\texttt{\_gtfs}, \texttt{linee\_ids},
+\texttt{linee\_nomi}, \texttt{location\_type},
+\texttt{parent\_station}, \texttt{stop\_code},
+\texttt{stop\_desc}, \texttt{stop\_desc\_search},
+\texttt{stop\_id}, \texttt{stop\_lat},
+\texttt{stop\_lon}, \texttt{stop\_name} &
+Anagrafica delle fermate, coordinate geografiche
+e associazione con le linee di trasporto.\\
+
+\texttt{GTFSFeeds} &
+\texttt{active\_version},
+\texttt{app\_service\_date},
+\texttt{schema\_version} &
+Gestione dei metadati GTFS e della versione
+attiva del feed. Il documento contiene anche
+la sottocollezione \texttt{versioni}.\\
+
+\texttt{LineeBus} &
+\texttt{\_gtfs}, \texttt{agency\_id},
+\texttt{agency\_timezone}, \texttt{descrizione},
+\texttt{fermate\_ids}, \texttt{nome},
+\texttt{operatore}, \texttt{route\_color},
+\texttt{route\_desc}, \texttt{route\_id},
+\texttt{route\_long\_name},
+\texttt{route\_short\_name} &
+Descrizione delle linee di trasporto pubblico,
+degli operatori e delle fermate associate.\\
+
+\texttt{OrariBus} &
+\texttt{\_gtfs}, \texttt{linea\_id},
+\texttt{orari}, \texttt{service\_date},
+\texttt{stop\_id} &
+Memorizzazione dei dati relativi agli orari
+delle linee e alle fermate, con riferimento
+alla data del servizio.\\
+
+\texttt{PagamentiDemo} &
+\texttt{causale}, \texttt{dataAggiornamento},
+\texttt{dataAvvio}, \texttt{dataRegistrazione},
+\texttt{durataOre}, \texttt{importo},
+\texttt{nomeTitolare}, \texttt{oraArrivo},
+\texttt{oraFine}, \texttt{stato},
+\texttt{targa}, \texttt{tipo} &
+Registrazione e gestione delle operazioni
+di pagamento simulate e dei relativi stati.\\
+
+\texttt{PersonaleEnte} &
+\texttt{nome}, \texttt{ruolo} &
+Anagrafica del personale dell'ente
+e identificazione dei ruoli operativi.\\
+
+\texttt{ProfiliUtente} &
+\texttt{codiceFiscale}, \texttt{cognome},
+\texttt{dataAggiornamento},
+\texttt{dataCreazione}, \texttt{email},
+\texttt{nome}, \texttt{provincia},
+\texttt{residenza}, \texttt{ruolo},
+\texttt{uid} &
+Gestione dei profili applicativi e delle
+informazioni anagrafiche degli utenti,
+con associazione all'identificativo Firebase.\\
+
+\texttt{Richieste}\newline
+\texttt{PagamentoDemo} &
+\texttt{dataAvvio}, \texttt{idOperazione},
+\texttt{improntaRichiesta} &
+Associazione tra richieste di pagamento
+e operazioni, a supporto della gestione
+dell'idempotenza.\\
+
+\texttt{Tariffe} &
+\texttt{prezzo} &
+Memorizzazione dei valori tariffari
+utilizzati dai servizi applicativi.\\
+
+\texttt{Transazioni} &
+\texttt{data}, \texttt{descrizione},
+\texttt{idPagamentoDemo},
+\texttt{id\_operazione}, \texttt{id\_utente},
+\texttt{importo}, \texttt{nomeTitolare},
+\texttt{simulato}, \texttt{stato},
+\texttt{tipo}, \texttt{uid} &
+Memorizzazione dello storico delle transazioni,
+del relativo stato e dei riferimenti
+agli utenti e ai pagamenti simulati.\\
+
+\texttt{TransazioniSosta} &
+\texttt{DataArrivo}, \texttt{DataFine},
+\texttt{Importo}, \texttt{Stato},
+\texttt{Targa}, \texttt{data},
+\texttt{descrizione}, \texttt{durataOre},
+\texttt{idPagamentoDemo},
+\texttt{id\_operazione}, \texttt{id\_utente},
+\texttt{importo} &
+Registrazione dei dettagli delle operazioni
+di sosta, comprese durata, targa,
+importo e riferimenti alla transazione.\\
+
+\texttt{TrasportoDRT} &
+\texttt{Destinazione},
+\texttt{NumeroPasseggeri},
+\texttt{Orario}, \texttt{PuntoRitiro} &
+Memorizzazione delle informazioni relative
+alle richieste di trasporto a chiamata.\\
+\bottomrule
+\caption{}
+\end{longtable}
+\noindent
+In particolare, le collezioni \texttt{FermateBus} e \texttt{LineeBus} rivestono un ruolo centrale nei servizi di consultazione. Questi dati sono stati generati nel database attraverso l'uso di file \emph{General Transit Feed Specification} (GTFS) \cite{gtfs}, fornitomi da un funzionario del comune di Scicli in collaborazione con la Sais (ente di trasporto locale). 
+\\
+La collezione \texttt{ProfiliUtente} integra le informazioni di identità restituite da Firebase Authentication con gli attributi specifici dell'applicazione, tra cui nome, cognome, residenza, provincia e ruolo. L'identificativo dell'utente Firebase, \texttt{uid}, viene utilizzato dal backend come chiave del relativo documento. Questa scelta permette di stabilire una corrispondenza tra identità autenticata e profilo funzionale, evitando di considerare l'indirizzo e-mail come unica chiave primaria dell'applicazione.
+
+\section{Payment e Integrazione del Wallet}
+
+Il pagamento simulato si basa su un paradigma client-server, articolato in tre macro-componenti: 
+\begin{itemize}
+    \item l'applicazione client mobile,
+    \item il backend di orchestrazione
+    \item l'interfaccia web del Wallet
+\end{itemize}  
+L'integrazione tra il modulo mobile e il portafoglio digitale non avviene in modo diretto, bensì è mediata dal server centrale, garantendo cos\`i un disaccoppiamento logico e una maggiore sicurezza nella gestione delle transazioni.
+\\
+Il flusso operativo si avvia nel momento in cui l'utente conferma la volontà di procedere al pagamento. In questa fase, il client genera una chiave di idempotenza univoca,  per prevenire la problematica delle transazioni duplicate in caso di instabilit\`a della connessione di rete. \\
+La richiesta viene inoltrata tramite chiamate RESTful al backend, implementato in ambiente Java Spring Boot. Quest'ultimo ha il compito di validare la congruit\`a dei parametri ricevuti, calcolare gli importi dovuti e registrare l'operazione in uno stato transitorio (pendente) all'interno del database NoSQL, basato su tecnologia Firebase Firestore.
+\\
+Successivamente all'inizializzazione del pagamento, il flusso esecutivo viene reindirizzato verso l'ambiente web del Wallet. Questa componente di frontend interroga in modo indipendente le API esposte dal server per ottenere la lista aggiornata delle operazioni, filtrando le transazioni per l'esposizione all'utente. Al termine delle procedure all'interno del portafoglio virtuale, l'utente viene riportato all'applicazione nativa tramite un meccanismo di callback. Durante quest'ultimo passaggio, il client utilizza l'identificativo univoco della transazione per interrogare nuovamente il backend, verificandone l'esito definitivo (completato, annullato o rifiutato) al fine di aggiornare coerentemente lo stato dell'interfaccia grafica. 

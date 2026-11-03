@@ -1,0 +1,37 @@
+\chapter{Introduzione}
+\subsection*{Contesto generale }
+Nell’attuale panorama globale, l’efficienza dei trasporti è gestita maggiormente da sistemi informatici. Più precisamente, negli ultimi anni si è effettuata un’analisi sul trasporto pubblico, che ci ha permesso di osservare quanto quest’ultimo ha subito una trasformazione radicale. Questa trasformazione è stata accelerata dallo sviluppo di piattaforme di infomobilità, come Google Maps, dalla contemporanea evoluzione dei dispositivi mobili, che hanno reso l’accesso alle informazioni di viaggio immediato.
+\\ \\
+In questo contesto si inserisce il paradigma del \textit{Mobility as a Service} (MaaS). Tale paradigma rappresenta un concetto globale di mobilità che prevede l’integrazione di servizi di trasporto pubblico e privato accessibili grazie ad un unico canale digitale. \\
+Attraverso piattaforme dedicate vi è l'aggregazione di diverse funzionalità: dal trasporto pubblico di linea ai servizi di sharing (car, bike) e taxi, l’utente è in grado di pianificare, prenotare e corrispondere il pagamento delle varie soluzioni di viaggio, semplificando i vari spostamenti di urbani attraverso un’interfaccia unificata.
+\\ \\
+Il punto di partenza di tale lavoro è l'analisi del comune di Scicli, le cui caratteristiche morfologiche e infrastrutturali richiedono soluzioni di trasporto sempre più efficienti. 
+\\ \\
+Nello specifico, la conformazione territoriale del comune di Scicli è articolata nel seguente modo: un centro storico barocco (sito UNESCO) e diverse frazioni marittime (Donnalucata, Cava d’Aliga, Sampieri, ecc.), situate a una distanza variabile tra i 7 e i 10 km. L’esigenza primaria è dunque la creazione di una connessione combinata tra le linee di trasporto urbano ed extraurbano, i servizi taxi e le navette turistiche stagionali. \\
+Questa frammentazione geografica, unita alla forte stagionalità dei flussi turistici, rende l'adozione di una piattaforma centralizzata lo strumento ideale per colmare i gap di collegamento logistico.
+
+\subsection*{Obiettivi della tesi }
+Il seguente lavoro di tesi si pone l’obiettivo di analizzare e progettare un’architettura software basata sui principi del MaaS, configurata per la rete di trasporti della città di Scicli. Il progetto si articola in varie fasi. 
+\\
+Una prima fase di analisi sviluppata secondo i principi dell’ingegneria del software, e in una successiva fase implementativa, che prevede lo sviluppo di un’applicazione mobile mediante il framework \textit{React Native}.
+\\
+L’applicazione si propone di digitalizzare e ottimizzare l’offerta di mobilità attraverso le seguenti funzionalità chiave:
+\begin{itemize}
+    \item Digitalizzazione delle linee urbane.
+    \item Servizi \textit{Demand Responsive Transport} (DRT), ovvero trasporto su richiesta, corse ``a chiamata'' per collegare le frazioni al centro urbano durante specifiche fasce orarie. Tale approccio mira a superare l’inefficienza dei bus sottoutilizzati nel periodo invernale, riducendo sensibilmente l’impatto ambientale e le emissioni di gas.
+    \item Digitalizzazione del sistema dei pagamenti, attraverso un’interfaccia centralizzata di controllo e transazione, dei pagamenti per le aree di sosta tariffata (strisce blu).
+    \item Monitoraggio in tempo reale circa la chiusura delle vie del centro storico e proposta automatizzata di percorsi alternativi o navette dedicate a causa di eventi paesani.
+\end{itemize}
+Così facendo, l’implementazione di questa piattaforma punta a rendere più efficiente il sistema di trasporto per i residenti e per i turisti, rappresentando una risorsa fondamentale per l’evoluzione tecnologica e il potenziamento dei servizi di trasporto urbano in un piccolo comune, come quello di Scicli.
+\subsection*{Presentazione degli attori }
+Dal punto di vista dell'ingegneria del software, la modellazione del sistema ha inizio con l'identificazione dei suoi attori. Nello specifico, per la piattaforma in esame sono stati individuati i seguenti attori di sistema:
+\begin{itemize}
+    \item \textbf{UTENTE REGISTRATO:} rappresenta l’utente che usa il software dopo essersi registrato ed ha accesso a più funzionalità e servizi, può sia accedere alle funzionalità dell’utente non registrato sia ad altre funzionalità aggiuntive.
+    \item \textbf{UTENTE NON REGISTRATO:} rappresenta l’utente che usufruisce dei servizi di base. Può consultare orari, percorsi e disponibilità dei mezzi in tempo reale, senza tuttavia poter effettuare pagamenti, prenotare un trasporto su richiesta o salvare preferenze.
+    \item \textbf{TURISTA:} rappresenta un’evoluzione dell’utente registrato che ha accesso a pacchetti speciali dedicati a servizi turistici integrati, non disponibili per l’utente Registrato standard.
+    \item \textbf{ADMIN DELL'ENTE:} Gestore responsabile dell’azienda di bus, o proprietari di navette turistiche. Ha la responsabilità di configurare le corse, visualizzare i guadagni e monitorare i mezzi in tempo reale.
+    \item \textbf{OPERATORE:} rappresenta il profilo tecnico - operativo di colui che usa la piattaforma per gestione logistica, ricevendo in tempo reale le richieste delle chiamate del DRT, o dei taxi per vedere il percorso assegnato.
+    \item \textbf{FUNZIONARIO COMUNALE:} attore istituzionale responsabile dell’aggiornamento in tempo reale di ordinanze di chiusura strade per eventi, per l’aggiornamento del traffico urbano.
+    \item \textbf{PAYMENT:} attore non umano, esterno al sistema che si occupa della gestione di transazioni finanziarie.
+\end{itemize}
+Nelle pagine successive verranno approfonditi i diversi casi d’uso e la relativa documentazione degli attori precedentemente citati.

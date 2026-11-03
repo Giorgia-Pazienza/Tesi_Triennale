@@ -1,0 +1,50 @@
+\chapter{Conclusioni e Sviluppi Futuri}
+
+\section{Riepilogo del lavoro}
+Il presente lavoro di tesi ha affrontato l'analisi, la progettazione e la realizzazione prototipale di una piattaforma informatica ispirata al paradigma \emph{Mobility as a Service} (MaaS), con l'obiettivo di delineare un punto di accesso unitario a differenti servizi di mobilità riferiti al territorio del Comune di Scicli. La proposta nasce dall'esigenza di ricondurre in un un'unica applicazione le operazioni di spostamento all'interno del comune, anche se considerate separatamente, possono risultare difficili da consultare e utilizzare.
+\\
+Il contesto territoriale ha costituito un elemento determinante nelle scelte progettuali. Il rapporto tra il centro urbano e le frazioni costiere, fra cui Donnalucata, Arizza, Sampieri e Cava d'Aliga, pone infatti questioni di accessibilità e collegamento che possono assumere caratteristiche differenti durante l'anno. La concentrazione stagionale dei flussi turistici rende particolarmente importante la disponibilità di informazioni comprensibili e aggiornate, mentre nei periodi caratterizzati da una domanda più contenuta diviene rilevante valutare forme di trasporto flessibile. In questo quadro, il paradigma MaaS è stato assunto non come una singola tecnologia, bensì come un criterio di integrazione dei servizi e di semplificazione dell'esperienza dell'utente.
+\\
+Il percorso seguito si è articolato in fasi logicamente connesse. L'analisi iniziale ha permesso di individuare gli attori coinvolti, le operazioni richieste e i principali vincoli del dominio applicativo. La successiva progettazione, supportata da strumenti di modellazione \emph{Unified Modeling Language} (UML), ha definito i casi d'uso e le interazioni fra componenti mediante diagrammi di attività e di sequenza. 
+\\
+A partire da tali risultati, è stata sviluppata un'architettura ibrida che integra un frontend mobile in React Native, un backend Java Spring Boot, servizi BaaS Firebase per autenticazione e dati, e un database relazionale separato per la gestione dei percorsi GTFS
+
+\section{Sviluppi futuri}
+La progettazione dell'applicativo pone delle basi solide per un'espansione del sistema. Al fine di rendere la piattaforma uno strumento sempre più avanzato si propongono di seguito le principali idee per alcuni futuri sviluppi.
+\subsection*{Consolidamento dell'architettura e interoperabilità dei dati}
+Le future linee di intervento mirano innanzitutto a stabilizzare l'architettura ibrida, spostando le operazioni più delicate, come quelle amministrative o soggette a vincoli, direttamente sul server. L'accesso diretto al database dal client verrà mantenuto solo dove la sincronizzazione in tempo reale è davvero necessaria, tutelandolo con adeguate regole di sicurezza.
+\\
+Parallelamente, si rende necessaria l'introduzione di modelli dati condivisi e controlli semantici per prevenire incongruenze informative tra i vari livelli applicativi. 
+\\
+In ambito trasporti, ciò si traduce in un processo strutturato per l'importazione dei dati GTFS, essenziale per distinguere la programmazione statica dagli effettivi aggiornamenti in tempo reale. Un'ulteriore estensione riguarderà la gestione delle aree di parcheggio a pagamento: sarà necessario integrare fonti dati georeferenziate, attualmente mancanti, per consentire la selezione visiva delle strisce blu direttamente dalla mappa. Infine, per favorire l'interoperabilità con enti e operatori esterni, è opportuno definire un set di API stabili e versionate; affinché l'integrazione tecnica sia efficace, essa dovrà tuttavia essere supportata da precisi accordi organizzativi volti a certificare la qualità e l'affidabilità delle informazioni erogate all'utente.
+\\
+\subsection*{Ottimizzazione logistica tramite Teoria dei Grafi}
+Un'evoluzione interessante riguarda l'impiego di algoritmi per la ricerca e l'ottimizzazione dei percorsi. Modellando la rete della città di Scicli come un grafo pesato: può essere rappresentata mediante un grafo orientato e pesato $G=(V,E)$, nel quale l'insieme $V$ comprende fermate e nodi rilevanti della rete urbana, mentre $E$ rappresenta i collegamenti percorribili. A ciascun arco $e\in E$ è associato un peso non negativo $w(e)$, interpretabile, ad esempio, come tempo di percorrenza stimato. Il costo complessivo di un cammino $P$ risulta pertanto:
+\begin{equation}
+    C(P)=\sum_{e\in P} w(e),
+    \label{eq:costo_percorso}
+\end{equation}
+\vspace{1em}
+Per poi successivamente utilizzare algoritmi di ricerca e calcolo del percorso minimo, come l'algoritmo di Dijkstra o altri. Questo approccio permetterebbe di ottimizzare le risorse, riducendo i chilometri percorsi a vuoto e migliorando i tempi di attesa per gli utenti.
+
+\subsection*{Integrazione di Intelligenza Artificiale e NLP}
+Una seconda prospettiva di sviluppo riguarda l'introduzione di un assistente virtuale in grado di semplificare l'accesso alle informazioni e alle operazioni più comuni. Attraverso tecniche di \emph{Natural Language Processing} (NLP), l'utente potrebbe formulare richieste in linguaggio naturale, senza dover conoscere in anticipo la collocazione delle singole funzioni nell'interfaccia. 
+Un visitatore, per esempio, potrebbe chiedere quale collegamento sia disponibile tra il centro di Scicli e una località costiera, ricevere chiarimenti sui servizi di trasporto oppure ottenere indicazioni sull'esistenza di eventuali limitazioni alla circolazione.
+\\
+Per contenere il rischio di fornire informazioni non aggiornate, l'assistente potrebbe adottare un approccio \emph{Retrieval-Augmented Generation} (RAG), nel quale la generazione della risposta è supportata dal recupero di contenuti provenienti da fonti selezionate. Nel contesto del progetto, le fonti potrebbero comprendere descrizioni dei servizi, ordinanze pubblicate, informazioni validate sulle fermate e disponibilità del DRT, purché rese accessibili attraverso un livello applicativo controllato. 
+
+\subsection*{Sicurezza Informatica e Protezione dei Dati pèrsonali}
+Considerando la mole di dati sensibili trattati, legati alla geolocalizzazione degli utenti e alle transazioni finanziarie, un focus primario dovrà essere dedicato alla \textit{CSicurezza Informatica}. 
+\\
+A livello tecnico, sarà fondamentale proteggere le comunicazioni mediante protocolli crittografici robusti (come HTTPS/TLS per i dati in transito) e implementare meccanismi di difesa contro attacchi esterni, quali i DDoS. Parallelamente, le logiche di accesso dovranno essere rafforzate sia sugli endpoint del server Spring Boot, sia sulle regole di sicurezza di Firestore. L'obiettivo è applicare rigorosamente il principio del \emph{privilegio minimo}, verificando sempre lato server le credenziali e assicurando che ogni utente o servizio acceda esclusivamente alle risorse per cui è esplicitamente autorizzato.
+\\
+Sul versante della tutela della privacy, il sistema dovrà garantire la piena conformità al Regolamento Europeo (GDPR). Ciò si traduce nell'adozione di un approccio \emph{privacy by design}, implementando rigidi protocolli di minimizzazione e pseudonimizzazione dei dati personali. Queste misure, supportate da una gestione sicura dei segreti applicativi e da un monitoraggio continuo degli accessi, risultano essenziali per mitigare i rischi e offrire all'utente un ambiente digitale affidabile e protetto.
+
+\subsection*{Evoluzione dei Sistemi di Pagamento}
+La gestione dei pagamenti costituisce un'area di evoluzione significativa, poiché il prototipo dispone attualmente di flussi dimostrativi, utili a descrivere il ciclo di vita di un'operazione ma non equivalenti a una transazione economica effettiva. Il passaggio a un ambiente produttivo richiederebbe una separazione netta tra creazione della richiesta di pagamento, esecuzione attraverso un soggetto abilitato, acquisizione dell'esito, registrazione contabile ed eventuali procedure di annullamento o rimborso.
+\\
+Considerando la destinazione del sistema a un Ente pubblico italiano, l'evoluzione dell'architettura richiederà obbligatoriamente l'integrazione con il nodo pagoPA, in conformità alle direttive dell'Agenzia per l'Italia Digitale (AgID). A tale infrastruttura istituzionale si dovrebbe affiancare il supporto ai principali portafogli digitali (\textit{digital wallet} come Apple Pay e Google Pay), al fine di ottimizzare i tempi di transazione e migliorare l'esperienza d'uso, con particolare beneficio per l'utenza turistica e occasionale.
+
+\section{Conclusioni}
+In conclusione, il sistema MaaS creato per la città di Scicli rappresenta una \emph{base prototipale per l'integrazione digitale della mobilità locale}, dalla quale è possibile sviluppare una piattaforma progressivamente più completa. Il contributo della tesi consiste nell'aver trasformato un insieme eterogeneo di esigenze territoriali in un modello funzionale e in un'architettura software concreta, evidenziandone opportunità, limiti e possibili percorsi di evoluzione. La prospettiva di un futuro impiego operativo resta subordinata alla qualità dei dati, alla sicurezza, alla validazione dei processi e alla collaborazione tra amministrazione, operatori e utenti finali.
+
